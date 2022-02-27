@@ -24,6 +24,13 @@ def symbols_to_num(symbols)
   numbers[symbols]
 end
 
+def valid_policy_number?(policy_number)
+  count = 0
+  1.upto(9) { |i| count += (policy_number[-i] * i) }
+
+  count % 11 == 0
+end
+
 def arrange_policy_number(policy_num)
   start = 0
   stop = 3
@@ -45,8 +52,9 @@ def execute
   policy_numbers = []
   while file_data.length != 0 
     num = file_data.slice!(0...3).join
-    policy_number = arrange_policy_number(num)
-    policy_numbers.push(policy_number.map { |num| symbols_to_num(num) }.join(""))
+    policy_number = arrange_policy_number(num).map { |num| symbols_to_num(num) }
+    policy_number = valid_policy_number?(policy_number) ? policy_number : false
+    policy_numbers.push(policy_number)
     file_data.slice!(0)
   end
   policy_numbers
