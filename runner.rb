@@ -21,14 +21,18 @@ def symbols_to_num(symbols)
     nine  => 9
   }
 
-  numbers[symbols]
+  numbers[symbols] ? numbers[symbols] : '?'
 end
 
-def valid_policy_number?(policy_number)
+def legible_valid_policy_number(policy_number)
   count = 0
-  1.upto(9) { |i| count += (policy_number[-i] * i) }
+  1.upto(9) do |i| 
+    return :ILL if policy_number[-i] == '?'
 
-  count % 11 == 0
+    count += (policy_number[-i] * i)
+  end
+
+  count % 11 == 0 ? true : :ERR
 end
 
 def arrange_policy_number(policy_num)
@@ -50,14 +54,18 @@ def execute
   file = File.open("test.txt")
   file_data = file.readlines.map(&:chomp)
   policy_numbers = []
+  result = {}
   while file_data.length != 0 
     num = file_data.slice!(0...3).join
     policy_number = arrange_policy_number(num).map { |num| symbols_to_num(num) }
-    policy_number = valid_policy_number?(policy_number) ? policy_number : false
+    result[policy_number] = { status: legible_valid_policy_number(policy_number) }
     policy_numbers.push(policy_number)
     file_data.slice!(0)
   end
-  policy_numbers
+
+  result.each do |k, v|
+    File.write("result.txt", "#{k.join("")} #{v[:status] == true ? nil : v[:status]} \r\n", mode: "a")
+  end
 end
 
-p execute
+execute
